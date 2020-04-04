@@ -777,12 +777,14 @@ int Sipeed_OV2640::dvpInit(uint32_t freq)
 
     if(0 == sensor_ov_detect()){//find ov sensor
         // printf("find ov sensor\n");
+        return 0;
     }
     else if(0 == sensro_gc_detect()){//find gc0328 sensor
-        // printf("find gc3028\n");
+        printf("found gc0328 but not implemented...\n");
+        return -1;
     }
 
-    return 0;
+    return -2;
 }
 
 int Sipeed_OV2640::cambus_scan()
@@ -912,27 +914,24 @@ int Sipeed_OV2640::sensor_ov_detect()
 
     if (_slaveAddr == LEPTON_ID) {
         _id = LEPTON_ID;
-		/*set LEPTON xclk rate*/
-		/*lepton_init*/
+        // sensor is not supported
+        return -3;
     } else {
         // Read ON semi sensor ID.
         cambus_readb(_slaveAddr, ON_CHIP_ID, &_id);
         if (_id == MT9V034_ID) {
-			/*set MT9V034 xclk rate*/
-			/*mt9v034_init*/
+            /*set MT9V034 xclk rate*/
+            /*mt9v034_init*/
+            return -3;
         } else { // Read OV sensor ID.
             cambus_readb(_slaveAddr, OV_CHIP_ID, &_id);
             // Initialize sensor struct.
             switch (_id) {
-                case OV9650_ID:
-					/*ov9650_init*/
-                    break;
                 case OV2640_ID:
                     // printf("detect ov2640, id:%x\n", _slaveAddr);
-                    break;
+                    return 0;
+                case OV9650_ID:
                 case OV7725_ID:
-					/*ov7725_init*/
-                    break;
                 default:
                     // Sensor is not supported.
                     return -3;
@@ -944,7 +943,7 @@ int Sipeed_OV2640::sensor_ov_detect()
     //     // Sensor init failed.
     //     return -4;
     // }
-    return 0;
+    return -4;
 }
 
 int Sipeed_OV2640::sensro_gc_detect()
