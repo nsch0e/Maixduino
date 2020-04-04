@@ -1413,7 +1413,7 @@ int Sipeed_OV2640::ov2640_get_exposure_us(int *exposure_us)
     return ret;
 }
 
-int Sipeed_OV2640::ov2640_set_auto_whitebal(int enable, float r_gain_db, float g_gain_db, float b_gain_db)
+int Sipeed_OV2640::ov2640_set_auto_whitebal(int enable, uint8_t r_gain_db, uint8_t g_gain_db, uint8_t b_gain_db)
 {
     uint8_t reg;
     int ret = cambus_readb(_slaveAddr, BANK_SEL, &reg);
@@ -1421,8 +1421,15 @@ int Sipeed_OV2640::ov2640_set_auto_whitebal(int enable, float r_gain_db, float g
     ret |= cambus_readb(_slaveAddr, CTRL1, &reg);
     ret |= cambus_writeb(_slaveAddr, CTRL1, (reg & (~CTRL1_AWB)) | ((enable != 0) ? CTRL1_AWB : 0));
 
-    if ((enable == 0) && (!isnanf(r_gain_db)) && (!isnanf(g_gain_db)) && (!isnanf(b_gain_db))
-                      && (!isinff(r_gain_db)) && (!isinff(g_gain_db)) && (!isinff(b_gain_db))) {
+    ret |= cambus_readb(_slaveAddr, ENABLE_GAIN_CONTROLL, &reg);
+    reg &= ~(1<<6);
+    reg |= (enable?0:1) << 6;
+    ret |= cambus_writeb(_slaveAddr, ENABLE_GAIN_CONTROLL, reg);
+    
+    if (enable == 0) {
+        ret |= cambus_writeb(_slaveAddr, R_GAIN, r_gain_db);
+        ret |= cambus_writeb(_slaveAddr, G_GAIN, g_gain_db);
+        ret |= cambus_writeb(_slaveAddr, B_GAIN, b_gain_db);
     }
 
     return ret;

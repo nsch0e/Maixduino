@@ -57,7 +57,6 @@ public:
     virtual void setRotation(uint8_t rotation);
     virtual void setInvert(bool invert);
 
-private:
     uint8_t* _dataBuffer;    // put RGB565 data
     uint8_t* _aiBuffer;      // put RGB888 data
     uint8_t  _resetPoliraty; // reset poliraty flag
@@ -99,7 +98,7 @@ private:
     int ov2640_get_gain_db(float *gain_db);
     int ov2640_set_auto_exposure(int enable, int exposure_us);
     int ov2640_get_exposure_us(int *exposure_us);
-    int ov2640_set_auto_whitebal(int enable, float r_gain_db, float g_gain_db, float b_gain_db);
+    int ov2640_set_auto_whitebal(int enable, uint8_t r_gain_db = 0x65, uint8_t g_gain_db= 0X41, uint8_t b_gain_db = 0x4F);
     int ov2640_get_rgb_gain_db(float *r_gain_db, float *g_gain_db, float *b_gain_db);
     int ov2640_set_hmirror(int enable);
     int ov2640_set_vflip(int enable);

@@ -28,6 +28,12 @@
 #define HSIZE8                  0xC0
 #define VSIZE8                  0xC1
 #define CTRL1                   0xC3
+
+#define ENABLE_GAIN_CONTROLL    0xC7
+#define R_GAIN                  0xCC
+#define G_GAIN                  0xCD
+#define B_GAIN                  0xCE
+
 #define MS_SP                   0xF0
 #define SS_ID                   0xF7
 #define SS_CTRL                 0xF7
