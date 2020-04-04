@@ -103,7 +103,7 @@ long File::read(void *buf, uint32_t nbyte) {
   while(bytesToRead)
   {
     readBytesOnece = (bytesToRead>65000) ? 65000 : bytesToRead;
-    ret = (uint16_t)_file->read(buf+(nbyte-bytesToRead), readBytesOnece);
+    ret = (uint16_t)_file->read((char *)buf+(nbyte-bytesToRead), readBytesOnece);
     if(ret == 0xffff)
       return -1;
     bytesToRead -= ret;
