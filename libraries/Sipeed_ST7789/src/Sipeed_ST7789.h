@@ -75,6 +75,8 @@ public:
     virtual void invertDisplay(boolean invert);
 
     void drawImage(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height, uint16_t* img);
+    void drawImageGray(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height, uint8_t *img);
+    void drawImageScale(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height, uint16_t srcWidth, uint16_t srcHeight, uint16_t *img);
 
 private:
     SPIClass& _spi;

@@ -22,68 +22,68 @@ uint16_t g_lcd_display_buff[LCD_Y_MAX * LCD_X_MAX];
 
 static uint16_t gray2rgb565[64] = {
     0x0000,
-    0x2000,
-    0x4108,
-    0x6108,
-    0x8210,
-    0xa210,
-    0xc318,
-    0xe318,
-    0x0421,
-    0x2421,
-    0x4529,
-    0x6529,
-    0x8631,
-    0xa631,
-    0xc739,
-    0xe739,
-    0x0842,
-    0x2842,
-    0x494a,
-    0x694a,
-    0x8a52,
-    0xaa52,
-    0xcb5a,
-    0xeb5a,
-    0x0c63,
-    0x2c63,
-    0x4d6b,
-    0x6d6b,
-    0x8e73,
-    0xae73,
-    0xcf7b,
-    0xef7b,
-    0x1084,
-    0x3084,
-    0x518c,
-    0x718c,
-    0x9294,
-    0xb294,
-    0xd39c,
-    0xf39c,
-    0x14a5,
-    0x34a5,
-    0x55ad,
-    0x75ad,
-    0x96b5,
-    0xb6b5,
-    0xd7bd,
-    0xf7bd,
-    0x18c6,
-    0x38c6,
-    0x59ce,
-    0x79ce,
-    0x9ad6,
-    0xbad6,
-    0xdbde,
-    0xfbde,
-    0x1ce7,
-    0x3ce7,
-    0x5def,
-    0x7def,
-    0x9ef7,
-    0xbef7,
-    0xdfff,
+    0x0020,
+    0x0841,
+    0x0861,
+    0x1082,
+    0x10a2,
+    0x18c3,
+    0x18e3,
+    0x2104,
+    0x2124,
+    0x2945,
+    0x2965,
+    0x3186,
+    0x31a6,
+    0x39c7,
+    0x39e7,
+    0x4208,
+    0x4228,
+    0x4a49,
+    0x4a69,
+    0x528a,
+    0x52aa,
+    0x5acb,
+    0x5aeb,
+    0x630c,
+    0x632c,
+    0x6b4d,
+    0x6b6d,
+    0x738e,
+    0x73ae,
+    0x7bcf,
+    0x7bef,
+    0x8410,
+    0x8430,
+    0x8c51,
+    0x8c71,
+    0x9492,
+    0x94b2,
+    0x9cd3,
+    0x9cf3,
+    0xa514,
+    0xa534,
+    0xad55,
+    0xad75,
+    0xb596,
+    0xb5b6,
+    0xbdd7,
+    0xbdf7,
+    0xc618,
+    0xc638,
+    0xce59,
+    0xce79,
+    0xd69a,
+    0xd6ba,
+    0xdedb,
+    0xdefb,
+    0xe71c,
+    0xe73c,
+    0xef5d,
+    0xef7d,
+    0xf79e,
+    0xf7be,
+    0xffdf,
     0xffff,
 };
 
@@ -229,6 +229,24 @@ void lcd_draw_picture(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height,
     tft_write_word((uint32_t*)g_lcd_display_buff, width * height / 2);
 }
 
+void lcd_draw_picture_scale(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height, uint16_t srcWidth, uint16_t srcHeight, uint16_t *ptr)
+{
+    lcd_set_area(x1, y1, x1 + width - 1, y1 + height - 1);
+    for (int xx = 0; xx < width; xx += 2) {
+        for (int yy = 0; yy < height; yy++) {
+            uint32_t scalePos = xx + width * yy;
+
+            uint32_t origPos = (xx * srcWidth) / width +
+                               ((yy * srcHeight) / height) * srcWidth;
+            uint32_t origPos1 = ((xx + 1) * srcWidth) / width +
+                                ((yy * srcHeight) / height) * srcWidth;
+            g_lcd_display_buff[scalePos] = SWAP_16(ptr[origPos1]);
+            g_lcd_display_buff[scalePos + 1] = SWAP_16(ptr[origPos]);
+        }
+    }
+    tft_write_word((uint32_t *)g_lcd_display_buff, width * height / 2);
+}
+
 //draw pic's roi on (x,y)
 //x,y of LCD, w,h is pic; rx,ry,rw,rh is roi
 void lcd_draw_pic_roi(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t rx, uint16_t ry, uint16_t rw, uint16_t rh, uint32_t *ptr)
@@ -244,20 +262,18 @@ void lcd_draw_pic_roi(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t r
     return;
 }
 
-static uint16_t line_buf[320]; //TODO: optimize
+
 void lcd_draw_pic_gray(uint16_t x1, uint16_t y1, uint16_t width, uint16_t height, uint8_t *ptr)
 {
-    int x, y;
-    for (y = 0; y < height; y++)
-    {
-        for (x = 0; x < width; x++)
-        {
-            line_buf[x] = gray2rgb565[(ptr[y * width + x]) >> 2];
-        }
-        lcd_set_area(x1, y1 + y, x1 + width - 1, y1 + y);
-        tft_write_byte((uint8_t*)line_buf, width * 2);
+    uint32_t i;
+    uint16_t *p = (uint16_t*)ptr;
+    lcd_set_area(x1, y1, x1 + width - 1, y1 + height - 1);
+    for (i = 0; i < LCD_MAX_PIXELS; i += 2) {
+        g_lcd_display_buff[i] = (gray2rgb565[(ptr[i + 1]) >> 2]);
+        g_lcd_display_buff[i + 1] = (gray2rgb565[(ptr[i]) >> 2]);
+        p += 2;
     }
-    return;
+    tft_write_word((uint32_t *)g_lcd_display_buff, width * height / 2);
 }
 
 void lcd_draw_pic_grayroi(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t rx, uint16_t ry, uint16_t rw, uint16_t rh, uint8_t *ptr)

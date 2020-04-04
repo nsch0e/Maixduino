@@ -170,3 +170,17 @@ void Sipeed_ST7789::drawImage(uint16_t x1, uint16_t y1, uint16_t width, uint16_t
     lcd_draw_picture(x1, y1, width, height, img);
 }
 
+void Sipeed_ST7789::drawImageGray(uint16_t x1, uint16_t y1, uint16_t width,
+                                  uint16_t height, uint8_t *img) {
+    configASSERT(img != nullptr || img != 0);
+
+    lcd_draw_pic_gray(x1, y1, width, height, img);
+}
+
+void Sipeed_ST7789::drawImageScale(uint16_t x1, uint16_t y1, uint16_t width,
+                                   uint16_t height, uint16_t srcWidth,
+                                   uint16_t srcHeight, uint16_t *img) {
+    configASSERT(img != nullptr || img != 0);
+
+    lcd_draw_picture_scale(x1, y1, width, height, srcWidth, srcHeight, img);
+}
